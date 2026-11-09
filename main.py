@@ -81,8 +81,12 @@ async def webhook(request: Request):
         text = message.get("text", "")
         username = user.get("username","")
 
+    if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
+        db.insert(data={
+            "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
+            "username": str(msg.username),
+            "user_id": int(msg.user.get("id", 0))
+        })
 
-    await send_message(msg.chat_id, str(db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0)))))
-    
 
     return {"ok": True}
