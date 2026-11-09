@@ -2,7 +2,10 @@ import os
 import random
 import httpx
 import json
+import supabase
+import os
 
+from supabase import create_client, Client
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 
@@ -13,6 +16,12 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
+
+async def select(table_name:str = "users", data:str = "*"):
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    response = supabase.table(table_name).select(data).execute()
+
+    return response.data
 
 
 async def telegram_request(method, data):
@@ -79,7 +88,8 @@ async def webhook(request: Request):
         chat_type = message["chat"]["type"]
         text = message.get("text", "")
 
-    await send_message(msg.chat_id, "1")
+    x = await select("users", "*")
+    await send_message(msg.chat_id, str(x))
 
 
     return {"ok": True}
