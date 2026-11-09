@@ -3,3 +3,4 @@ requests>=2.31.0
 python-telegram-bot>=20.7
 pillow>=12.1.1
 fastapi>=0.162.2
+supabase>=2.34.1

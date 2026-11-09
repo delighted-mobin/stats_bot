@@ -5,11 +5,16 @@ import json
 
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
+from database import select
 
 app = FastAPI()
 
 TOKEN = os.environ.get("BOT_TOKEN", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
+
 
 async def telegram_request(method, data):
     if not TOKEN:
@@ -50,7 +55,6 @@ async def send_message(chat_id, text):
         }
     )
 
-
 @app.get("/")
 async def index():
     return PlainTextResponse("ok good")
@@ -76,7 +80,8 @@ async def webhook(request: Request):
         chat_type = message["chat"]["type"]
         text = message.get("text", "")
 
-    await send_message(msg.chat_id, msg.text)
+    x = str(await select("users", "*"))
+    await send_message(msg.chat_id, x)
 
 
     return {"ok": True}
