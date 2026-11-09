@@ -7,7 +7,7 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 async def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY):
     try:
-        db: Client = create_client(url, key)
+        db = create_client(url, key)
         return db
     except :
         return -1
