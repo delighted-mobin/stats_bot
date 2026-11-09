@@ -55,6 +55,11 @@ async def send_message(chat_id, text):
         }
     )
 
+async def send_message_data(data):
+    return await telegram_request(
+            "sendMessage",data
+        )
+
 @app.get("/")
 async def index():
     return PlainTextResponse("ok good")
@@ -82,6 +87,15 @@ async def webhook(request: Request):
         username = user.get("username","")
 
     if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
+        send_message_data(data={
+            "chat_id": msg.chat_id,
+            "text": "برای عضویت بر روی عضویت کلیک کنید",
+            "reply_markup": {
+                "inline_keyboard": [
+                    {"text": "عضویت", "callback_data": "sign_in", "style": "primary"}
+                ]
+            }
+        })
         db.insert(data={
             "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
             "username": str(msg.username),
