@@ -87,7 +87,7 @@ async def webhook(request: Request):
         username = user.get("username","")
 
     if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
-        send_message_data(data={
+        await send_message_data(data={
             "chat_id": msg.chat_id,
             "text": "برای عضویت بر روی عضویت کلیک کنید",
             "reply_markup": {
