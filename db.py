@@ -56,6 +56,6 @@ def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
     try:
         db = connect_db()
         response = db.table(table_name).select("*").eq(eq, eq_value).execute()
-        return True if response.data != [] else False
+        return response.data
     except:
         return -1
