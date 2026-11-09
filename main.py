@@ -4,6 +4,7 @@ import httpx
 import json
 import supabase
 import os
+import db as db
 
 from supabase import create_client, Client
 from fastapi import FastAPI, Request
@@ -12,12 +13,8 @@ from fastapi.responses import PlainTextResponse
 app = FastAPI()
 
 TOKEN = os.environ.get("BOT_TOKEN", "")
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
-
-import db as db
 
 async def telegram_request(method, data):
     if not TOKEN:
@@ -83,7 +80,7 @@ async def webhook(request: Request):
         chat_type = message["chat"]["type"]
         text = message.get("text", "")
 
-    x = await db.fetch()
+    x = db.fetch()
     await send_message(msg.chat_id, str(x))
 
 
