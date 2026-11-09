@@ -83,7 +83,11 @@ async def webhook(request: Request):
         chat_type = message["chat"]["type"]
         text = message.get("text", "")
 
+<<<<<<< HEAD
     x = await db.fetch()
+=======
+    x = await select("users", "*")
+>>>>>>> 4f158173d47e717f190d7551390839fce53817a1
     await send_message(msg.chat_id, str(x))
 
 
