@@ -1,8 +1,11 @@
 import supabase
-import main as base
+import os
 from supabase import create_client, Client
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-async def connect_db(url = base.SUPABASE_URL, key = base.SUPABASE_KEY):
+
+async def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY):
     try:
         db: Client = create_client(url, key)
         return db
