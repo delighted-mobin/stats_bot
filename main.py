@@ -17,12 +17,7 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 
-async def select(table_name:str = "users", data:str = "*"):
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    response = supabase.table(table_name).select(data).execute()
-
-    return response.data
-
+import db as db
 
 async def telegram_request(method, data):
     if not TOKEN:
@@ -88,9 +83,8 @@ async def webhook(request: Request):
         chat_type = message["chat"]["type"]
         text = message.get("text", "")
 
-    x = await select("users", "*")
-    j = json.dumps(x)
-    await send_message(msg.chat_id, str(j))
+    x = await db.fetch()
+    await send_message(msg.chat_id, str(x))
 
 
     return {"ok": True}
