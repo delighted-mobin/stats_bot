@@ -89,7 +89,7 @@ async def webhook(request: Request):
         text = message.get("text", "")
 
     x = await select("users", "*")
-    await send_message(msg.chat_id, str(x))
+    await send_message(msg.chat_id, str(xzxaZ))
 
 
     return {"ok": True}
