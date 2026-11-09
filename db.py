@@ -52,7 +52,7 @@ def upsert(table_name:str = "users", data:dict = {}):
     except:
         return -1
 
-def exist(table_name:str = "users", eq:str = "id", eq_value:str = "0"):
+def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
     try:
         db = connect_db()
         response = db.table(table_name).select("*").eq(eq, eq_value).execute()
