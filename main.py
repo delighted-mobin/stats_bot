@@ -72,9 +72,6 @@ async def webhook(request: Request):
 
     message = update.get("message") or update.get("edited_message")
 
-    if not message:
-        return {"ok": True}
-
     class msg:
         chat_id = message["chat"]["id"]
         message_id = message.get("message_id")
@@ -83,23 +80,24 @@ async def webhook(request: Request):
         text = message.get("text", "")
         username = user.get("username","")
 
-    await send_message(msg.chat_id, str(message))
+    await send_message(msg.chat_id, str(update))
     try:
-        if "callback_query" in message:
+        if "callback_query" in update:
             class callback:
-                data = message["callback_query"]
+                data = update["callback_query"]
                 id = data.get("id")
                 chat_id = data.get("message").get("chat").get("id")
                 message_id = data.get("message").get("id")
                 button = data.get("data")
+                user = data.get("from")
 
             await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
             match callback.button:
                 case "signin":
                     db.insert(data={
-                        "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
-                        "username": str(msg.username),
-                        "user_id": int(msg.user.get("id", 0))
+                        "name": f"{callback.user.get("first_name", "")} {callback.user.get("last_name", "")}",
+                        "username": str(callback.user.get("username", "")),
+                        "user_id": int(callback.user.get("id", 0))
                     })
                     await send_message_data(data={
                         "chat_id": callback.chat_id,
