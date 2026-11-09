@@ -75,9 +75,6 @@ async def webhook(request: Request):
     if not message:
         return {"ok": True}
 
-    if message.get("from", {}).get("is_bot", False):
-        return {"ok": True}
-
     class msg:
         chat_id = message["chat"]["id"]
         message_id = message.get("message_id")
@@ -86,38 +83,42 @@ async def webhook(request: Request):
         text = message.get("text", "")
         username = user.get("username","")
 
-    if "callback_query" in message:
-        class callback:
-            data = message["callback_query"]
-            id = data.get("id")
-            chat_id = data.get("message").get("chat").get("id")
-            message_id = data.get("message").get("id")
-            button = data.get("data")
+    await send_message(msg.chat_id, str(message))
+    try:
+        if "callback_query" in message:
+            class callback:
+                data = message["callback_query"]
+                id = data.get("id")
+                chat_id = data.get("message").get("chat").get("id")
+                message_id = data.get("message").get("id")
+                button = data.get("data")
 
-        await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
-        match callback.button:
-            case "signin":
-                db.insert(data={
-                    "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
-                    "username": str(msg.username),
-                    "user_id": int(msg.user.get("id", 0))
-                })
-                await send_message_data(data={
-                    "chat_id": callback.chat_id,
-                    "text": "شما با موفقیت عضو شدید",
-                })
+            await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
+            match callback.button:
+                case "signin":
+                    db.insert(data={
+                        "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
+                        "username": str(msg.username),
+                        "user_id": int(msg.user.get("id", 0))
+                    })
+                    await send_message_data(data={
+                        "chat_id": callback.chat_id,
+                        "text": "شما با موفقیت عضو شدید",
+                    })
 
-    if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
-        await send_message_data(data={
-            "chat_id": msg.chat_id,
-            "text": "برای عضویت بر روی عضویت کلیک کنید",
-            "reply_markup": {
-                "inline_keyboard": [
-                    [
-                        {"text": "عضویت", "callback_data": "signin", "style": "primary"}
+        if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
+            await send_message_data(data={
+                "chat_id": msg.chat_id,
+                "text": "برای عضویت بر روی عضویت کلیک کنید",
+                "reply_markup": {
+                    "inline_keyboard": [
+                        [
+                            {"text": "عضویت", "callback_data": "signin", "style": "primary"}
+                        ]
                     ]
-                ]
-            }
-        })
+                }
+            })
+    except Exception as e:
+        await send_message(msg.chat_id, str(e))
 
     return {"ok": True}
