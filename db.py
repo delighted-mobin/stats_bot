@@ -51,3 +51,11 @@ def upsert(table_name:str = "users", data:dict = {}):
         return response.data
     except:
         return -1
+
+def exist(table_name:str = "users", eq:str = "id", eq_value:str = "0"):
+    try:
+        db = connect_db()
+        response = db.table(table_name).select("*").eq(eq, eq_value).execute()
+        return True if response.data != [] else False
+    except:
+        return -1
