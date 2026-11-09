@@ -82,7 +82,7 @@ async def webhook(request: Request):
         username = user.get("username","")
 
 
-    send_message(msg.chat_id, str(db.select("users", "user_id", 12)))
+    send_message(msg.chat_id, str(db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0)))))
     
 
     return {"ok": True}
