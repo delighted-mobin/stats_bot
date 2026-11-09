@@ -86,6 +86,27 @@ async def webhook(request: Request):
         text = message.get("text", "")
         username = user.get("username","")
 
+    if "callback_query" in message:
+        class callback:
+            data = message["callback_query"]
+            id = data.get("id")
+            chat_id = data.get("message").get("chat").get("id")
+            message_id = data.get("message").get("id")
+            button = data.get("data")
+
+        await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
+        match callback.button:
+            case "signin":
+                db.insert(data={
+                    "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
+                    "username": str(msg.username),
+                    "user_id": int(msg.user.get("id", 0))
+                })
+                await send_message_data(data={
+                    "chat_id": callback.chat_id,
+                    "text": "شما با موفقیت عضو شدید",
+                })
+
     if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
         await send_message_data(data={
             "chat_id": msg.chat_id,
@@ -98,11 +119,5 @@ async def webhook(request: Request):
                 ]
             }
         })
-        db.insert(data={
-            "name": f"{msg.user.get("first_name", "")} {msg.user.get("last_name", "")}",
-            "username": str(msg.username),
-            "user_id": int(msg.user.get("id", 0))
-        })
-
 
     return {"ok": True}
