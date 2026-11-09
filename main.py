@@ -81,7 +81,7 @@ async def webhook(request: Request):
         text = message.get("text", "")
         username = user.get("username","")
 
-    if db.exist(eq="user_id", eq_value=str(msg.user["id"])) != True:
+    if db.exist(eq="user_id", eq_value=int(msg.user["id"])) != True:
         db.insert(data={
             "name": msg.user.get("first_name", "") + msg.user.get("last_name", ""),
             "username": msg.username,
