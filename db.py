@@ -17,8 +17,8 @@ async def fetch(table_name:str = "users"):
         db = await connect_db()
         response = await db.table(table_name).select("*").execute()
         return response.data
-    except:
-        return -1
+    except Exception as e:
+        return e
 
 async def select(table_name:str = "users", eq:str = "id", eq_value:str = "0"):
     try:
