@@ -92,7 +92,9 @@ async def webhook(request: Request):
             "text": "برای عضویت بر روی عضویت کلیک کنید",
             "reply_markup": {
                 "inline_keyboard": [
-                    {"text": "عضویت", "callback_data": "sign_in", "style": "primary"}
+                    [
+                        {"text": "عضویت", "callback_data": "signin", "style": "primary"}
+                    ]
                 ]
             }
         })
