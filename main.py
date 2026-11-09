@@ -5,7 +5,6 @@ import json
 
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
-from database import select
 
 app = FastAPI()
 
