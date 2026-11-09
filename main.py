@@ -70,24 +70,16 @@ async def webhook(request: Request):
 
     update = await request.json()
 
-    message = update.get("message") or update.get("edited_message")
+    message = update.get("message", {}) or update.get("edited_message", {})
 
-    class msg:
-        chat_id = message["chat"]["id"]
-        message_id = message.get("message_id")
-        user = message.get("from", {})
-        chat_type = message["chat"]["type"]
-        text = message.get("text", "")
-        username = user.get("username","")
-
-    await send_message(msg.chat_id, str(update))
+    await send_message(update.get("message", {}).get("chat", {}).get("id"), str(update))
     try:
         if "callback_query" in update:
             class callback:
                 data = update["callback_query"]
                 id = data.get("id")
                 chat_id = data.get("message").get("chat").get("id")
-                message_id = data.get("message").get("id")
+                message_id = data.get("message").get("message_id")
                 button = data.get("data")
                 user = data.get("from")
 
@@ -95,7 +87,7 @@ async def webhook(request: Request):
             match callback.button:
                 case "signin":
                     db.insert(data={
-                        "name": f"{callback.user.get("first_name", "")} {callback.user.get("last_name", "")}",
+                        "name": f'{callback.user.get("first_name", "")} {callback.user.get("last_name", "")}',
                         "username": str(callback.user.get("username", "")),
                         "user_id": int(callback.user.get("id", 0))
                     })
@@ -103,6 +95,15 @@ async def webhook(request: Request):
                         "chat_id": callback.chat_id,
                         "text": "شما با موفقیت عضو شدید",
                     })
+            return {"ok": True}
+
+        class msg:
+            chat_id = message.get("chat").get("id")
+            message_id = message.get("message_id")
+            user = message.get("from", {})
+            chat_type = message.get("chat").get("type")
+            text = message.get("text", "")
+            username = user.get("username","")
 
         if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
             await send_message_data(data={
@@ -117,6 +118,6 @@ async def webhook(request: Request):
                 }
             })
     except Exception as e:
-        await send_message(msg.chat_id, str(e))
+        return {"ok": False, "error": str(e)}
 
     return {"ok": True}
