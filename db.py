@@ -9,8 +9,8 @@ async def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY):
     try:
         db = create_client(url, key)
         return db
-    except :
-        return -1
+    except Exception as e:
+        return e
 
 async def fetch(table_name:str = "users"):
     try:
