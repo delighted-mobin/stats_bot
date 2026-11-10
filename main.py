@@ -112,9 +112,9 @@ async def webhook(request: Request):
 
     if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
         db.insert(data={
-                    "name": f'{msg.user.first_name} {msg.user.last_name}',
-                    "username": str(msg.user.username),
-                    "user_id": int(msg.user.id)
+                "name": f'{msg.user.first_name} {msg.user.last_name}',
+                "username": str(msg.user.username),
+                "user_id": int(msg.user.id)
         })
 
     if msg.text == "/start":
@@ -141,7 +141,7 @@ Create Bot
         case "enter_bot_token_1":
             if len(msg.text) > 10:
                 secret = msg.text[0:10]
-                db.insert(table_name="tokens", data={"secret":secret, "token":msg.text})
+                db.upsert(table_name="tokens", data={"secret":secret, "token":msg.text})
                 db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                 await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
