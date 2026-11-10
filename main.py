@@ -133,6 +133,7 @@ Create Bot
                 }
             })
 
+    await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
     status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
     match status:
         case "main":
