@@ -71,8 +71,9 @@ async def webhook(request: Request):
     update = await request.json()
 
     message = update.get("message", {}) or update.get("edited_message", {})
+    sec = await request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    await send_message(message.get("chat", {}).get("id"), str(sec))
 
-    await send_message(update.get("message", {}).get("chat", {}).get("id"), str(update))
     try:
         if "callback_query" in update:
             class callback:
@@ -86,11 +87,6 @@ async def webhook(request: Request):
             await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
             match callback.button:
                 case "signin":
-                    db.insert(data={
-                        "name": f'{callback.user.get("first_name", "")} {callback.user.get("last_name", "")}',
-                        "username": str(callback.user.get("username", "")),
-                        "user_id": int(callback.user.get("id", 0))
-                    })
                     await send_message_data(data={
                         "chat_id": callback.chat_id,
                         "text": "شما با موفقیت عضو شدید",
@@ -106,13 +102,22 @@ async def webhook(request: Request):
             username = user.get("username","")
 
         if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
+            db.insert(data={
+                        "name": f'{callback.user.get("first_name", "")} {callback.user.get("last_name", "")}',
+                        "username": str(callback.user.get("username", "")),
+                        "user_id": int(callback.user.get("id", 0))
+            })
+
+        if "/start" or "start" in msg.text:
             await send_message_data(data={
-                "chat_id": msg.chat_id,
-                "text": "برای عضویت بر روی عضویت کلیک کنید",
-                "reply_markup": {
-                    "inline_keyboard": [
+            "chat_id": msg.chat_id,
+            "text": """
+Create Bot
+""",
+            "reply_markup": {
+                "inline_keyboard": [
                         [
-                            {"text": "عضویت", "callback_data": "signin", "style": "primary"}
+                            {"text": "Create bot", "callback_data": "rain_stat_main", "style": "primary"}
                         ]
                     ]
                 }
