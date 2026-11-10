@@ -99,7 +99,7 @@ async def webhook(request: Request):
             case "mb_1":
                 token_list = []
                 inline_keyboard = [[]]
-                db_list = db.select(table_name="tokesn", eq="creator_id", eq_value=int(callback.user.id))
+                db_list = db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
                 
                 for data in db_list:
                     token_list.append(data["token"])
