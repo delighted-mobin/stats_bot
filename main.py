@@ -98,8 +98,13 @@ async def webhook(request: Request):
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_token_1")
             case "mb_1":
                 token_list = []
-                inline_keyboard = [[]]
+                inline_keyboard = []
                 db_list = db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
+                if len(db_list) == 0: return
+
+                for i in int(len(db_list)/2):
+                    inline_keyboard.append([])
+                if int(len(db_list)/2) == 0: inline_keyboard.append([])
                 
                 for data in db_list:
                     token_list.append(data["token"])
