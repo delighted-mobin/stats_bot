@@ -71,8 +71,8 @@ async def webhook(request: Request):
     update = await request.json()
 
     message = update.get("message", {}) or update.get("edited_message", {})
-    sec = await request.headers.get("X-Telegram-Bot-Api-Secret-Token")
-    await send_message(message.get("chat", {}).get("id"), str(sec))
+    await send_message(update.get("chat", {}).get("id"), str(await request.json()))
+    await send_message(update.get("chat", {}).get("id"), str(await request.headers))
 
     try:
         if "callback_query" in update:
