@@ -144,7 +144,7 @@ Create Bot
                 if db.exist(table_name="tokens", eq="token", eq_value=msg.text) == True:
                     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
                 else:
-                    db.insert(table_name="tokens", data={"secret":secret, "token":msg.text, "create_id": int(msg.user.id)})
+                    db.insert(table_name="tokens", data={"secret":secret, "token":msg.text, "creator_id": int(msg.user.id)})
                     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
