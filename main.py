@@ -96,6 +96,23 @@ async def webhook(request: Request):
                     "text": "توکن بات رو وارد کنید:"
                 })
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_token_1")
+            case "mb_1":
+                token_list = []
+                inline_keyboard = [[]]
+                db_list = db.select(table_name="tokesn", eq="creator_id", eq_value=int(callback.user.id))
+                
+                for data in db_list:
+                    token_list.append(data["token"])
+                    inline_keyboard[0].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
+                
+                await send_message_data(data={
+                    "chat_id": callback.chat_id,
+                    "text": f"""شما {len(token_list)} ربات ثبت شده دارید\nبرای مدیریت هر توکن برروی آن کلیک کنید""",
+                    "reply_markup": {
+                        "inline_keyboard": inline_keyboard
+                    }
+                })
+                
         return {"ok": True}
 
     class msg:
@@ -127,7 +144,8 @@ Create Bot
             "reply_markup": {
                 "inline_keyboard": [
                         [
-                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"}
+                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"},
+                            {"text": "My bots", "callback_data": "mb_1", "style": "success"}
                         ]
                     ]
                 }
