@@ -141,8 +141,11 @@ Create Bot
         case "enter_bot_token_1":
             if len(msg.text) > 10:
                 secret = msg.text[0:10]
-                db.upsert(table_name="tokens", data={"secret":secret, "token":msg.text})
-                db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-                await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
+                if db.exist(table_name="tokens", eq="token", eq_value=msg.text) == True:
+                    await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است")
+                else:
+                    db.insert(table_name="tokens", data={"secret":secret, "token":msg.text})
+                    db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+                    await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
     return {"ok": True}
