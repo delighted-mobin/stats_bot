@@ -69,47 +69,59 @@ async def index():
 async def webhook(request: Request):
 
     update = await request.json()
-
     message = update.get("message", {}) or update.get("edited_message", {})
-    await send_message(message.get("chat").get("id"), str(update))
-    sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
-    await send_message(message.get("chat").get("id"), str(sec))
+
+    #https://api.telegram.org/bot<TOKEN>)/setWebhook?url=<URL>/&secret_token=SEC
+    bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
 
     try:
         if "callback_query" in update:
             class callback:
-                data = update["callback_query"]
-                id = data.get("id")
-                chat_id = data.get("message").get("chat").get("id")
-                message_id = data.get("message").get("message_id")
-                button = data.get("data")
-                user = data.get("from")
+                data = update.get("callback_query",{})
+                id = data.get("id",0)
+                chat_id = data.get("message",{}).get("chat",{}).get("id",0)
+                message_id = data.get("message",{}).get("message_id",0)
+                button = data.get("data",{})
+                class user:
+                    user = update.get("callback_query",{}).get("from",{})
+                    id = user.get("id", 0)
+                    first_name = user.get("first_name", "")
+                    last_name = user.get("last_name", "")
+                    username = user.get("username","")
 
             await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
             match callback.button:
-                case "signin":
+                case "cb_1":
                     await send_message_data(data={
                         "chat_id": callback.chat_id,
-                        "text": "شما با موفقیت عضو شدید",
+                        "text": "توکن بات رو وارد کنید:"
                     })
+                    db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_token_1")
             return {"ok": True}
 
         class msg:
-            chat_id = message.get("chat").get("id")
-            message_id = message.get("message_id")
-            user = message.get("from", {})
-            chat_type = message.get("chat").get("type")
+            chat_id = message.get("chat",{}).get("id",0)
+            message_id = message.get("message_id",0)
+            class user:
+                user = message.get("from", {})
+                id = user.get("id", 0)
+                first_name = user.get("first_name", "")
+                last_name = user.get("last_name", "")
+                username = user.get("username","")
+            chat_type = message.get("chat",{}).get("type","")
             text = message.get("text", "")
-            username = user.get("username","")
 
-        if db.exist(eq="user_id", eq_value=int(msg.user.get("id", 0))) == False:
+        if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
             db.insert(data={
-                        "name": f'{callback.user.get("first_name", "")} {callback.user.get("last_name", "")}',
-                        "username": str(callback.user.get("username", "")),
-                        "user_id": int(callback.user.get("id", 0))
+                        "name": f'{msg.user.first_name} {msg.user.last_name}',
+                        "username": str(msg.user.username),
+                        "user_id": int(msg.user.id)
             })
 
+        await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
+
         if "/start" or "start" in msg.text:
+            db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
             await send_message_data(data={
             "chat_id": msg.chat_id,
             "text": """
@@ -118,11 +130,12 @@ Create Bot
             "reply_markup": {
                 "inline_keyboard": [
                         [
-                            {"text": "Create bot", "callback_data": "rain_stat_main", "style": "primary"}
+                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"}
                         ]
                     ]
                 }
             })
+
     except Exception as e:
         return {"ok": False, "error": str(e)}
 

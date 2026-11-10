@@ -59,3 +59,19 @@ def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
         return True if response.data != [] else False
     except:
         return -1
+
+def set_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
+    try:
+        db = connect_db()
+        response = db.table(table_name).update({"status": status}).eq(eq, eq_value).execute()
+        return response.data
+    except:
+        return -1
+
+def get_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
+    try:
+        db = connect_db()
+        response = db.table(table_name).select("status").eq(eq, eq_value).execute()
+        return response.data
+    except:
+        return -1
