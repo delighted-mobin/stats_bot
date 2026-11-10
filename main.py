@@ -120,7 +120,7 @@ async def webhook(request: Request):
 
         await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
 
-        if "/start" or "start" in msg.text:
+        if msg.text == "/start":
             db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
             await send_message_data(data={
             "chat_id": msg.chat_id,
