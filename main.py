@@ -122,7 +122,7 @@ async def webhook(request: Request):
             case "main":
                 pass
             case "enter_bot_token_1":
-                if msg.text > 10:
+                if len(msg.text) > 10:
                     secret = msg.text[0:9]
                     db.insert(table_name="tokens", data={"secret":secret, "token":msg.text})
                     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
