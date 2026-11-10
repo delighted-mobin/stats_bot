@@ -117,6 +117,22 @@ async def webhook(request: Request):
                     "user_id": int(msg.user.id)
         })
 
+    if msg.text == "/start":
+            db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+            await send_message_data(data={
+            "chat_id": msg.chat_id,
+            "text": """
+Create Bot
+    """,
+            "reply_markup": {
+                "inline_keyboard": [
+                        [
+                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"}
+                        ]
+                    ]
+                }
+            })
+
     match db.get_status(eq="user_id", eq_value=int(msg.user.id)).get("status", "main"):
         case "main":
             pass
@@ -126,21 +142,5 @@ async def webhook(request: Request):
                 db.insert(table_name="tokens", data={"secret":secret, "token":msg.text})
                 db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                 await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
-
-    if msg.text == "/start":
-        db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-        await send_message_data(data={
-        "chat_id": msg.chat_id,
-        "text": """
-Create Bot
-""",
-        "reply_markup": {
-            "inline_keyboard": [
-                    [
-                        {"text": "Create bot", "callback_data": "cb_1", "style": "primary"}
-                    ]
-                ]
-            }
-        })
 
     return {"ok": True}
