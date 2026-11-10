@@ -133,7 +133,7 @@ Create Bot
                 }
             })
 
-    match db.get_status(eq="user_id", eq_value=int(msg.user.id))["status"]:
+    match db.get_status(eq="user_id", eq_value=int(msg.user.id)).json().get("status", "main"):
         case "main":
             pass
         case "enter_bot_token_1":
