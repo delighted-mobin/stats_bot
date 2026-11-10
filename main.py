@@ -74,77 +74,73 @@ async def webhook(request: Request):
     #https://api.telegram.org/bot<TOKEN>)/setWebhook?url=<URL>/&secret_token=SEC
     bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
 
-    try:
-        if "callback_query" in update:
-            class callback:
-                data = update.get("callback_query",{})
-                id = data.get("id",0)
-                chat_id = data.get("message",{}).get("chat",{}).get("id",0)
-                message_id = data.get("message",{}).get("message_id",0)
-                button = data.get("data",{})
-                class user:
-                    user = update.get("callback_query",{}).get("from",{})
-                    id = user.get("id", 0)
-                    first_name = user.get("first_name", "")
-                    last_name = user.get("last_name", "")
-                    username = user.get("username","")
-
-            await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
-            match callback.button:
-                case "cb_1":
-                    await send_message_data(data={
-                        "chat_id": callback.chat_id,
-                        "text": "توکن بات رو وارد کنید:"
-                    })
-                    db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_token_1")
-            return {"ok": True}
-
-        class msg:
-            chat_id = message.get("chat",{}).get("id",0)
-            message_id = message.get("message_id",0)
+    if "callback_query" in update:
+        class callback:
+            data = update.get("callback_query",{})
+            id = data.get("id",0)
+            chat_id = data.get("message",{}).get("chat",{}).get("id",0)
+            message_id = data.get("message",{}).get("message_id",0)
+            button = data.get("data",{})
             class user:
-                user = message.get("from", {})
+                user = update.get("callback_query",{}).get("from",{})
                 id = user.get("id", 0)
                 first_name = user.get("first_name", "")
                 last_name = user.get("last_name", "")
                 username = user.get("username","")
-            chat_type = message.get("chat",{}).get("type","")
-            text = str(message.get("text", ""))
 
-        if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
-            db.insert(data={
-                        "name": f'{msg.user.first_name} {msg.user.last_name}',
-                        "username": str(msg.user.username),
-                        "user_id": int(msg.user.id)
-            })
+        await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
+        match callback.button:
+            case "cb_1":
+                await send_message_data(data={
+                    "chat_id": callback.chat_id,
+                    "text": "توکن بات رو وارد کنید:"
+                })
+                db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_token_1")
+        return {"ok": True}
 
-        match db.get_status(eq="user_id", eq_value=int(msg.user.id)):
-            case "main":
-                pass
-            case "enter_bot_token_1":
-                if len(msg.text) > 10:
-                    secret = msg.text[0:9]
-                    db.insert(table_name="tokens", data={"secret":secret, "token":msg.text})
-                    db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-                    await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
+    class msg:
+        chat_id = message.get("chat",{}).get("id",0)
+        message_id = message.get("message_id",0)
+        class user:
+            user = message.get("from", {})
+            id = user.get("id", 0)
+            first_name = user.get("first_name", "")
+            last_name = user.get("last_name", "")
+            username = user.get("username","")
+        chat_type = message.get("chat",{}).get("type","")
+        text = str(message.get("text", ""))
 
-        if msg.text == "/start":
-            db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-            await send_message_data(data={
-            "chat_id": msg.chat_id,
-            "text": """
+    if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
+        db.insert(data={
+                    "name": f'{msg.user.first_name} {msg.user.last_name}',
+                    "username": str(msg.user.username),
+                    "user_id": int(msg.user.id)
+        })
+
+    match db.get_status(eq="user_id", eq_value=int(msg.user.id)).get("status", "main"):
+        case "main":
+            pass
+        case "enter_bot_token_1":
+            if len(msg.text) > 10:
+                secret = msg.text[0:9]
+                db.insert(table_name="tokens", data={"secret":secret, "token":msg.text})
+                db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+                await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
+
+    if msg.text == "/start":
+        db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+        await send_message_data(data={
+        "chat_id": msg.chat_id,
+        "text": """
 Create Bot
 """,
-            "reply_markup": {
-                "inline_keyboard": [
-                        [
-                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"}
-                        ]
+        "reply_markup": {
+            "inline_keyboard": [
+                    [
+                        {"text": "Create bot", "callback_data": "cb_1", "style": "primary"}
                     ]
-                }
-            })
-
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+                ]
+            }
+        })
 
     return {"ok": True}
