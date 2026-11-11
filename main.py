@@ -69,6 +69,11 @@ async def delete_message(chat_id, message_id):
         }
     )
 
+async def edit_message(data):
+    return await telegram_request(
+        "editMessageText",data
+    )
+
 @app.get("/")
 async def index():
     return PlainTextResponse("ok good")
@@ -138,9 +143,9 @@ async def webhook(request: Request):
                 })
             case "back_1":
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
-                await delete_message(callback.chat_id, callback.message_id)
-                await send_message_data(data={
+                await edit_message(data={
                     "chat_id": callback.chat_id,
+                    "message_id": callback.message_id,
                     "text": """
                     Create Bot
                     """,
@@ -151,8 +156,23 @@ async def webhook(request: Request):
                                     {"text": "My bots", "callback_data": "mb_1", "style": "success"}
                                 ]
                             ]
-                        }
+                    }
                 })
+                #await delete_message(callback.chat_id, callback.message_id)
+                # await send_message_data(data={
+                #     "chat_id": callback.chat_id,
+                #     "text": """
+                #     Create Bot
+                #     """,
+                #     "reply_markup": {
+                #         "inline_keyboard": [
+                #                 [
+                #                     {"text": "Create bot", "callback_data": "cb_1", "style": "primary"},
+                #                     {"text": "My bots", "callback_data": "mb_1", "style": "success"}
+                #                 ]
+                #             ]
+                #         }
+                # })
                 
         return {"ok": True}
 
