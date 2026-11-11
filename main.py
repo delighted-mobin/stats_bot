@@ -102,7 +102,7 @@ async def webhook(request: Request):
                 db_list = db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
                 if len(db_list) == 0: return
 
-                for i in int(len(db_list)/2):
+                for i in range(int(len(db_list)/2)):
                     inline_keyboard.append([])
                 if int(len(db_list)/2) == 0: inline_keyboard.append([])
                 
