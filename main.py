@@ -201,15 +201,14 @@ async def webhook(request: Request):
                         {"text": "Back", "callback_data": "back_1", "style": "primary"}
                     ]
                 ]
-                
+
                 await edit_message(data={
                     "chat_id": callback.chat_id,
                     "message_id": callback.message_id,
-                    "text": f"""
-                    نام ربات: {data[0]["name"]}
-                    توکن ربات: {data[0]["token"]}
-
-                    """,
+                    "text": (
+                        f"نام ربات: {data[0]["name"]}"
+                        f"توکن ربات: {data[0]["token"]}"
+                    ),
                     "reply_markup": {
                         "inline_keyboard": inline_keyboard
                     }
