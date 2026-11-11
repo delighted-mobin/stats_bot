@@ -90,7 +90,7 @@ async def get_status(user_id):
     try:
         status = db.get_status(eq="user_id", eq_value=int(user_id))
         if len(status) != 0:
-            return status[0].get("status","main")
+            return str(status[0].get("status","main"))
         else:
             return "main"
 
