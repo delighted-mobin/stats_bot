@@ -227,7 +227,7 @@ async def webhook(request: Request):
                 if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
                     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
                 else:
-                    db.connect_db().table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("token",msg.text).eq("secret",auth).execute().data
+                    db.connect_db().table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("secret",auth).execute().data
                     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
