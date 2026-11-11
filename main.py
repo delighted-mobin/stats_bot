@@ -127,7 +127,7 @@ async def webhook(request: Request):
     #bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
     status = None
     if message != {}:
-        status = get_status(msg.user.id)
+        status = await get_status(msg.user.id)
         if "enter_bot_token_1" in status: await fix_database(("token"))
 
     if "callback_query" in update:
@@ -144,7 +144,7 @@ async def webhook(request: Request):
                 last_name = user.get("last_name", "")
                 username = user.get("username","")
 
-        _status = get_status(callback.user.id)
+        _status = await get_status(callback.user.id)
         if "enter_bot_token_1" in _status: await fix_database(("token"))
 
         match callback.button:
