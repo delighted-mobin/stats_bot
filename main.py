@@ -109,9 +109,9 @@ async def webhook(request: Request):
             case "cb_1":
                 await send_message_data(data={
                     "chat_id": callback.chat_id,
-                    "text": "توکن بات رو وارد کنید:"
+                    "text": "نام بات رو وارد کنید:"
                 })
-                db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_token_1")
+                db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_name_1")
             case "mb_1":
                 token_list = []
                 inline_keyboard = []
@@ -139,7 +139,7 @@ async def webhook(request: Request):
                 await edit_message(data={
                     "chat_id": callback.chat_id,
                     "message_id": callback.message_id,
-                    "text": f"""شما {len(token_list)} ربات ثبت شده دارید\nبرای مدیریت هر توکن برروی آن کلیک کنید""",
+                    "text": f"""شما {len(token_list)} ربات ثبت شده دارید\nبرای مدیریت هر ربات برروی آن کلیک کنید""",
                     "reply_markup": {
                         "inline_keyboard": inline_keyboard
                     }
@@ -161,7 +161,7 @@ async def webhook(request: Request):
                             ]
                     }
                 })
-                
+
         await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
                 
         return {"ok": True}
@@ -180,14 +180,14 @@ async def webhook(request: Request):
 
     if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
         db.insert(data={
-                "name": f'{msg.user.first_name} {msg.user.last_name}',
-                "username": str(msg.user.username),
-                "user_id": int(msg.user.id)
+            "name": f'{msg.user.first_name} {msg.user.last_name}',
+            "username": str(msg.user.username),
+            "user_id": int(msg.user.id)
         })
 
     if msg.text == "/start":
-            db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-            await send_message_data(data={
+        db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+        await send_message_data(data={
             "chat_id": msg.chat_id,
             "text": """
             Create Bot
@@ -200,7 +200,7 @@ async def webhook(request: Request):
                         ]
                     ]
                 }
-            })
+        })
 
     await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
 
@@ -208,14 +208,28 @@ async def webhook(request: Request):
     match status:
         case "main":
             pass
-        case "enter_bot_token_1":
+        case "enter_bot_name_1":
+            if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("name",msg.text.lower()).execute().data != []:
+                await send_reply(msg.chat_id, msg.message_id, "نام ربات تکراری هست\nنام دیگری وارد کنید:")
+                return
+            
+            if len(msg.text) > 1:
+                auth = random.randint(1111111111111111, 9999999999999999)
+
+                db.insert(table_name="tokens", data={"name":msg.text.lower(), "creator_id":msg.user.id})
+                db.set_status(eq="user_id", eq_value=int(msg.user.id), status=f"enter_bot_token_1_{auth}")
+                await send_reply(msg.chat_id, msg.message_id, "توکن ربات رو وارد کنید:")
+        case text if "enter_bot_token_1" in text:
             if len(msg.text) > 10:
                 secret = msg.text[0:10]
-                if db.exist(table_name="tokens", eq="token", eq_value=msg.text) == True:
-                    await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
-                else:
-                    db.insert(table_name="tokens", data={"secret":secret, "token":msg.text, "creator_id": int(msg.user.id)})
-                    db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-                    await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
+                auth = text[18,34]
+                await send_message(msg.chat_id, str(auth))
+
+                # if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
+                #     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
+                # else:
+                #     db.connect_db().table("tokens").update({}).eq("creator_id",msg.user.id).eq("token",msg.text).execute().data
+                #     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+                #     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
     return {"ok": True}

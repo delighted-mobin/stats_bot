@@ -5,12 +5,13 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 
-def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY):
+def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY) -> Client:
     try:
         db = create_client(url, key)
         return db
     except Exception as e:
         return e
+
 
 def fetch(table_name:str = "users"):
     try:
@@ -59,6 +60,7 @@ def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
         return True if response.data != [] else False
     except:
         return -1
+
 
 def set_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
     try:
