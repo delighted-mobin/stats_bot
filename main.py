@@ -139,7 +139,7 @@ async def webhook(request: Request):
 
                 index = 0
                 for data in db_list:
-                    if len(data["token"]) < 2: break
+                    if len(data.get("token","")) < 2: break
                     token_list.append(data["token"])
                     index += 1
                     iindex = int((float(index/2)-0.5)) 
