@@ -247,7 +247,6 @@ async def webhook(request: Request):
                     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
                 else:
                     resp = await setWebhook(msg.text, secret)
-                    await send_reply(msg.chat_id, msg.message_id, str(resp))
 
                     if resp.get("ok",False) != True:
                         await send_reply(msg.chat_id, msg.message_id, "عملیات ست کردن توکن موفقیت آمیز نبود.\nلطفا دوباره تلاش کنید")
