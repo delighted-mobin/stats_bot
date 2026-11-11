@@ -108,7 +108,7 @@ async def webhook(request: Request):
                 
                 for data in db_list:
                     token_list.append(data["token"])
-                    if len(inline_keyboard[0]) > 2:
+                    if len(inline_keyboard[0]) >= 2:
                         inline_keyboard[1].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                     else:
                         inline_keyboard[0].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
