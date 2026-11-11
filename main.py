@@ -140,19 +140,19 @@ async def webhook(request: Request):
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
                 await delete_message(callback.chat_id, callback.message_id)
                 await send_message_data(data={
-                            "chat_id": msg.chat_id,
-                            "text": """
-                            Create Bot
-                            """,
-                            "reply_markup": {
-                                "inline_keyboard": [
-                                        [
-                                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"},
-                                            {"text": "My bots", "callback_data": "mb_1", "style": "success"}
-                                        ]
-                                    ]
-                                }
-                            })
+                    "chat_id": callback.chat_id,
+                    "text": """
+                    Create Bot
+                    """,
+                    "reply_markup": {
+                        "inline_keyboard": [
+                                [
+                                    {"text": "Create bot", "callback_data": "cb_1", "style": "primary"},
+                                    {"text": "My bots", "callback_data": "mb_1", "style": "success"}
+                                ]
+                            ]
+                        }
+                })
                 
         return {"ok": True}
 
