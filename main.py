@@ -6,13 +6,27 @@ import supabase
 import os
 import db as db
 
-from supabase import create_client, Client
+from supabase import acreate_client, AsyncClient
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
-
-app = FastAPI(lifespan=db.connect_db)
+supabase: AsyncClient = None
 
 TOKEN = os.environ.get("BOT_TOKEN", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+@asynccontextmanager
+async def connect_db(app: FastAPI):
+    try:
+        global supabase
+        supabase = await acreate_client(SUPABASE_URL, SUPABASE_KEY)
+
+        yield
+    except Exception as e:
+        return e
+
+app = FastAPI(lifespan=connect_db)
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 

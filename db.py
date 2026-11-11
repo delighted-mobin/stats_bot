@@ -1,22 +1,8 @@
-import supabase
 import os
-import main
-from supabase import acreate_client, AsyncClient
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from main import supabase
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-supabase: AsyncClient = None
-
-@asynccontextmanager
-async def connect_db(app: main.FastAPI):
-    try:
-        global supabase
-        supabase = await acreate_client(SUPABASE_URL, SUPABASE_KEY)
-
-        yield
-    except Exception as e:
-        return e
 
 async def fetch(table_name:str = "users"):
     try:
