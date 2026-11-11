@@ -213,24 +213,22 @@ async def webhook(request: Request):
                 await send_reply(msg.chat_id, msg.message_id, "نام ربات تکراری هست\nنام دیگری وارد کنید:")
                 return
             
-            if len(msg.text) > 1:
+            if len(msg.text) > 1 and len(msg.text) <= 32:
                 auth = random.randint(1111111111111111, 9999999999999999)
 
-                db.insert(table_name="tokens", data={"name":msg.text.lower(), "creator_id":msg.user.id})
+                db.insert(table_name="tokens", data={"name":msg.text.lower(), "creator_id":msg.user.id, "secret":str(auth)})
                 db.set_status(eq="user_id", eq_value=int(msg.user.id), status=f"enter_bot_token_1_{auth}")
-                await send_reply(msg.chat_id, msg.message_id, str(auth))
                 await send_reply(msg.chat_id, msg.message_id, "توکن ربات رو وارد کنید:")
         case text if "enter_bot_token_1" in text:
-            if len(msg.text) > 10:
+            if len(msg.text) > 10 and len(msg.text) < 120:
                 secret = msg.text[0:10]
                 auth = text[18:34]
-                await send_message(msg.chat_id, str(auth))
 
-                # if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
-                #     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
-                # else:
-                #     db.connect_db().table("tokens").update({}).eq("creator_id",msg.user.id).eq("token",msg.text).execute().data
-                #     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
-                #     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
+                if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
+                    await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
+                else:
+                    db.connect_db().table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("token",msg.text).eq("secret",auth).execute().data
+                    db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+                    await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
     return {"ok": True}
