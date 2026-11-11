@@ -78,7 +78,7 @@ async def edit_message(data):
     except Exception as e:
         return str(e)
 
-async def setWebhook(token, secret):
+async def setWebhook(token, secret) -> list:
     try:
         async with httpx.AsyncClient(timeout=5) as client:
             response = await client.post(f"https://api.telegram.org/bot{token}/setWebhook?url={WEBHOOK}")
