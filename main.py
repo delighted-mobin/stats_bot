@@ -209,7 +209,7 @@ async def webhook(request: Request):
                         f"نام ربات: {data[0]["name"]}\n"
                         f"توکن ربات: <blockquote><code>{data[0]["token"]}</code></blockquote>"
                     ),
-                    "parse_mode": "HTML"
+                    "parse_mode": "HTML",
                     "reply_markup": {
                         "inline_keyboard": inline_keyboard
                     }
