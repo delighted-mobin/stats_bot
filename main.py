@@ -178,9 +178,9 @@ async def webhook(request: Request):
                     last_index = iindex - 1 if iindex != 0 else iindex
                 
                     if len(inline_keyboard[last_index]) >= 2:
-                        inline_keyboard[last_index+1].append({"text": data["name"][:14]+"..." if len(data["name"])>14 else data["name"], "callback_data": "mb_2", "style": "success"})
+                        inline_keyboard[last_index+1].append({"text": data["name"][:14]+"..." if len(data["name"])>14 else data["name"], "callback_data": f"mb_2_{data["secret"]}", "style": "success"})
                     else:
-                        inline_keyboard[last_index].append({"text": data["name"][:14]+"..." if len(data["name"])>14 else data["name"], "callback_data": "mb_2", "style": "success"})
+                        inline_keyboard[last_index].append({"text": data["name"][:14]+"..." if len(data["name"])>14 else data["name"], "callback_data": f"mb_2_{data["secret"]}", "style": "success"})
                 
                 inline_keyboard.append([{"text": "Back", "callback_data": "back_1", "style": "primary"}])
                 await edit_message(data={
@@ -191,6 +191,9 @@ async def webhook(request: Request):
                         "inline_keyboard": inline_keyboard
                     }
                 })
+            case text if "mb_2" in text:
+                data = db.select("tokens", eq="secret", eq_value=f"{text[4:]}")
+                await send_message(callback.chat_id, str(data))
             case "back_1":
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
                 await edit_message(data={
