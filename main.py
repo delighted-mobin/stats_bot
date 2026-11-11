@@ -134,6 +134,9 @@ async def webhook(request: Request):
                 last_name = user.get("last_name", "")
                 username = user.get("username","")
 
+        _status = status = db.get_status(eq="user_id", eq_value=int(callback.user.id))[0]["status"]
+        if "enter_bot_token_1" in _status: await fix_database(("token"))
+
         match callback.button:
             case "cb_1":
                 await send_message_data(data={
