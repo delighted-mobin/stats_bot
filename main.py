@@ -178,9 +178,9 @@ async def webhook(request: Request):
                     last_index = iindex - 1 if iindex != 0 else iindex
                 
                     if len(inline_keyboard[last_index]) >= 2:
-                        inline_keyboard[last_index+1].append({"text": data["name"], "callback_data": "mb_2", "style": "success"})
+                        inline_keyboard[last_index+1].append({"text": data["name"][:14]+"..." if len(data["name"])>14 else data["name"], "callback_data": "mb_2", "style": "success"})
                     else:
-                        inline_keyboard[last_index].append({"text": data["name"], "callback_data": "mb_2", "style": "success"})
+                        inline_keyboard[last_index].append({"text": data["name"][:14]+"..." if len(data["name"])>14 else data["name"], "callback_data": "mb_2", "style": "success"})
                 
                 inline_keyboard.append([{"text": "Back", "callback_data": "back_1", "style": "primary"}])
                 await edit_message(data={
