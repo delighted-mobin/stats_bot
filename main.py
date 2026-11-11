@@ -206,7 +206,7 @@ async def webhook(request: Request):
                     "chat_id": callback.chat_id,
                     "message_id": callback.message_id,
                     "text": (
-                        f"نام ربات: {data[0]["name"]}"
+                        f"نام ربات: {data[0]["name"]}\n"
                         f"توکن ربات: {data[0]["token"]}"
                     ),
                     "reply_markup": {
