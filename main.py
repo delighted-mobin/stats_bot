@@ -139,7 +139,7 @@ async def webhook(request: Request):
 
                 index = 0
                 for data in db_list:
-                    await send_message(callback.chat_id, str(data))
+                    if data["token"] == None: break
                     token_list.append(data["token"])
                     index += 1
                     iindex = int((float(index/2)-0.5)) 
