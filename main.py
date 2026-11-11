@@ -105,7 +105,6 @@ async def webhook(request: Request):
                 last_name = user.get("last_name", "")
                 username = user.get("username","")
 
-        await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
         match callback.button:
             case "cb_1":
                 await send_message_data(data={
@@ -162,21 +161,8 @@ async def webhook(request: Request):
                             ]
                     }
                 })
-                #await delete_message(callback.chat_id, callback.message_id)
-                # await send_message_data(data={
-                #     "chat_id": callback.chat_id,
-                #     "text": """
-                #     Create Bot
-                #     """,
-                #     "reply_markup": {
-                #         "inline_keyboard": [
-                #                 [
-                #                     {"text": "Create bot", "callback_data": "cb_1", "style": "primary"},
-                #                     {"text": "My bots", "callback_data": "mb_1", "style": "success"}
-                #                 ]
-                #             ]
-                #         }
-                # })
+                
+        await telegram_request("answerCallbackQuery", {"callback_query_id": callback.id})
                 
         return {"ok": True}
 
