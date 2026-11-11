@@ -218,6 +218,7 @@ async def webhook(request: Request):
 
                 db.insert(table_name="tokens", data={"name":msg.text.lower(), "creator_id":msg.user.id})
                 db.set_status(eq="user_id", eq_value=int(msg.user.id), status=f"enter_bot_token_1_{auth}")
+                await send_reply(msg.chat_id, msg.message_id, str(auth))
                 await send_reply(msg.chat_id, msg.message_id, "توکن ربات رو وارد کنید:")
         case text if "enter_bot_token_1" in text:
             if len(msg.text) > 10:
