@@ -3,11 +3,11 @@ import os
 from supabase import create_client, Client
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
+db = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY) -> Client:
     try:
-        db = create_client(url, key)
+        #db = create_client(url, key)
         return db
     except Exception as e:
         return e
