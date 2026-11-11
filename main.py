@@ -88,7 +88,7 @@ async def setWebhook(token, secret):
         return str(e)
 
 async def fix_database(*args):
-    if "token" in args: db.connect_db().table("tokens").delete().eq("token",None).execute()
+    if "token" in args: db.connect_db().table("tokens").delete().eq("token","NONE").execute()
 
 @app.get("/")
 async def index():
@@ -118,7 +118,7 @@ async def webhook(request: Request):
     status = None
     if message != {}:
         status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
-        if "enter_bot_token_1" in status: await fix_database("token")
+        if "enter_bot_token_1" in status: await fix_database(("token"))
 
     if "callback_query" in update:
         class callback:
@@ -220,6 +220,7 @@ async def webhook(request: Request):
                     ]
                 }
         })
+        return
 
     match status:
         case "main":
