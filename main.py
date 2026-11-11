@@ -97,8 +97,8 @@ async def get_status(user_id):
     except Exception as e:
         return str(e)
 
-async def fix_database(*args):
-    if "token" in args: db.connect_db().table("tokens").delete().eq("token","NONE").execute()
+async def fix_database(*args, user_id):
+    if "token" in args: db.connect_db().table("tokens").delete().eq("user_id", int(user_id)).eq("token","NONE").execute()
 
 @app.get("/")
 async def index():
@@ -142,7 +142,7 @@ async def webhook(request: Request):
                 username = user.get("username","")
 
         _status = await get_status(callback.user.id)
-        if "enter_bot_token_1" in _status: await fix_database(("token"))
+        if "enter_bot_token_1" in _status: await fix_database(("token"), callback.user.id)
 
         match callback.button:
             case "cb_1":
@@ -215,7 +215,7 @@ async def webhook(request: Request):
         })
 
     if msg.text == "/start":
-        if "enter_bot_token_1" in status: await fix_database(("token"))
+        if "enter_bot_token_1" in status: await fix_database(("token"), msg.user.id)
         db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
         await send_message_data(data={
             "chat_id": msg.chat_id,
