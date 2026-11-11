@@ -81,7 +81,7 @@ async def edit_message(data):
 async def setWebhook(token, secret):
     try:
         async with httpx.AsyncClient(timeout=5) as client:
-            response = await client.post(f"https://api.telegram.org/bot{token}/setWebhook?url={WEBHOOK}/&secret_token={secret}")
+            response = await client.post(f"https://api.telegram.org/bot{token}/setWebhook?url={WEBHOOK}")
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -246,7 +246,7 @@ async def webhook(request: Request):
                     resp = await setWebhook(msg.text, secret)
                     await send_reply(msg.chat_id, msg.message_id, str(resp))
 
-                    if resp.get("ok",False) != True:
+                    if resp.json().get("ok",False) != True:
                         await send_reply(msg.chat_id, "عملیات ست کردن توکن موفقیت آمیز نبود.\nلطفا دوباره تلاش کنید")
                         return {"ok": True}
                     
