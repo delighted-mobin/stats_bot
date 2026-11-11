@@ -101,8 +101,22 @@ async def webhook(request: Request):
     update = await request.json()
     message = update.get("message", {}) or update.get("edited_message", {})
 
+    class msg:
+        chat_id = message.get("chat",{}).get("id",0)
+        message_id = message.get("message_id",0)
+        class user:
+            user = message.get("from", {})
+            id = user.get("id", 0)
+            first_name = user.get("first_name", "")
+            last_name = user.get("last_name", "")
+            username = user.get("username","")
+        chat_type = message.get("chat",{}).get("type","")
+        text = str(message.get("text", ""))
+
     #https://api.telegram.org/bot<TOKEN>)/setWebhook?url=<URL>/&secret_token=SEC
-    bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
+    #bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
+    status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
+    if "enter_bot_token_1" in status: await fix_database("token")
 
     if "callback_query" in update:
         class callback:
@@ -181,20 +195,6 @@ async def webhook(request: Request):
                 
         return {"ok": True}
 
-    class msg:
-        chat_id = message.get("chat",{}).get("id",0)
-        message_id = message.get("message_id",0)
-        class user:
-            user = message.get("from", {})
-            id = user.get("id", 0)
-            first_name = user.get("first_name", "")
-            last_name = user.get("last_name", "")
-            username = user.get("username","")
-        chat_type = message.get("chat",{}).get("type","")
-        text = str(message.get("text", ""))
-
-    status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
-
     if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
         db.insert(data={
             "name": f'{msg.user.first_name} {msg.user.last_name}',
@@ -203,7 +203,6 @@ async def webhook(request: Request):
         })
 
     if msg.text == "/start":
-        if "enter_bot_token_1" in status: fix_database("token")
         db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
         await send_message_data(data={
             "chat_id": msg.chat_id,
