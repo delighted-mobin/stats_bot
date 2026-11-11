@@ -13,6 +13,7 @@ from fastapi.responses import PlainTextResponse
 app = FastAPI()
 
 TOKEN = os.environ.get("BOT_TOKEN", "")
+WEBHOOK = os.environ.get("WEBHOOK", "")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 
@@ -80,7 +81,7 @@ async def edit_message(data):
 async def setWebhook(token, secret):
     try:
         async with httpx.AsyncClient(timeout=5) as client:
-            response = await client.post(f"https://api.telegram.org/bot{token}/setWebhook?url=stats-bot-omega.vercel.app/&secret_token={secret}")
+            response = await client.post(f"https://api.telegram.org/bot{token}/setWebhook?url={WEBHOOK}/&secret_token={secret}")
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -241,7 +242,7 @@ async def webhook(request: Request):
                         await send_reply(msg.chat_id, "عملیات ست کردن توکن موفقیت آمیز نبود.\nلطفا دوباره تلاش کنید")
                         return {"ok": True}
                     
-                    db.connect_db().table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("secret",auth).execute().data
+                    db.connect_db().table("tokens").update({"token":msg.text, "secret":secret, "webhook": WEBHOOK}).eq("creator_id",msg.user.id).eq("secret",auth).execute().data
                     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
