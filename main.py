@@ -88,7 +88,7 @@ async def setWebhook(token, secret):
         return str(e)
 
 async def fix_database(*args):
-    if "fix_token" in args: db.connect_db().table("tokens").delete().eq("token",None).execute()
+    if "token" in args: db.connect_db().table("tokens").delete().eq("token",None).execute()
 
 @app.get("/")
 async def index():
@@ -193,6 +193,8 @@ async def webhook(request: Request):
         chat_type = message.get("chat",{}).get("type","")
         text = str(message.get("text", ""))
 
+    status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
+
     if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
         db.insert(data={
             "name": f'{msg.user.first_name} {msg.user.last_name}',
@@ -201,6 +203,7 @@ async def webhook(request: Request):
         })
 
     if msg.text == "/start":
+        if "enter_bot_token_1" in status: fix_database("token")
         db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
         await send_message_data(data={
             "chat_id": msg.chat_id,
@@ -217,9 +220,6 @@ async def webhook(request: Request):
                 }
         })
 
-    await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
-
-    status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
     match status:
         case "main":
             pass
