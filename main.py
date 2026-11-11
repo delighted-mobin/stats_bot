@@ -159,8 +159,8 @@ async def webhook(request: Request):
                 if len(db_list) == 0: 
                     await telegram_request("answerCallbackQuery", {
                         "callback_query_id": callback.id,
-                        "text": "شما هیچ ربات ثبت شده ای ندارد !.",
-                        "show_alert": False
+                        "text": "شما هیچ ربات ثبت شده ای ندارد !",
+                        "show_alert": True
                     })
                     return
 
