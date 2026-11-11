@@ -98,7 +98,7 @@ async def get_status(user_id):
         return str(e)
 
 async def fix_database(*args, user_id):
-    if "token" in args: db.connect_db().table("tokens").delete().eq("user_id", int(user_id)).eq("token","NONE").execute()
+    if "token" in args: db.connect_db().table("tokens").delete().eq("creator_id", int(user_id)).eq("token","NONE").execute()
 
 @app.get("/")
 async def index():
