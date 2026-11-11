@@ -70,9 +70,12 @@ async def delete_message(chat_id, message_id):
     )
 
 async def edit_message(data):
-    return await telegram_request(
-        "editMessageText",data
-    )
+    try:
+        return await telegram_request(
+            "editMessageText",data
+        )
+    except Exception as e:
+        return str(e)
 
 @app.get("/")
 async def index():
@@ -134,8 +137,9 @@ async def webhook(request: Request):
                         inline_keyboard[last_index].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                 
                 inline_keyboard.append([{"text": "Back", "callback_data": "back_1", "style": "primary"}])
-                await send_message_data(data={
+                await edit_message(data={
                     "chat_id": callback.chat_id,
+                    "message_id": callback.message_id,
                     "text": f"""شما {len(token_list)} ربات ثبت شده دارید\nبرای مدیریت هر توکن برروی آن کلیک کنید""",
                     "reply_markup": {
                         "inline_keyboard": inline_keyboard
@@ -213,6 +217,7 @@ async def webhook(request: Request):
             })
 
     await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
+
     status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
     match status:
         case "main":
