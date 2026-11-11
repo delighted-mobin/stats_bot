@@ -105,13 +105,18 @@ async def webhook(request: Request):
                 for i in range(int(len(db_list)/2)):
                     inline_keyboard.append([])
                 if int(len(db_list)/2) == 0: inline_keyboard.append([])
-                
+
+                index = 0
                 for data in db_list:
                     token_list.append(data["token"])
-                    if len(inline_keyboard[0]) >= 2:
-                        inline_keyboard[1].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
+                    index += 1
+                    iindex = int((float(index/2)-0.5)) 
+                    last_index = iindex - 1 if iindex != 0 else iindex
+
+                    if len(inline_keyboard[last_index]) >= 2:
+                        inline_keyboard[last_index+1].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                     else:
-                        inline_keyboard[0].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
+                        inline_keyboard[last_index].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                 await send_message_data(data={
                     "chat_id": callback.chat_id,
                     "text": f"""شما {len(token_list)} ربات ثبت شده دارید\nبرای مدیریت هر توکن برروی آن کلیک کنید""",
