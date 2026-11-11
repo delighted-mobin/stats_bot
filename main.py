@@ -115,8 +115,9 @@ async def webhook(request: Request):
 
     #https://api.telegram.org/bot<TOKEN>)/setWebhook?url=<URL>/&secret_token=SEC
     #bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
-    status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
-    if "enter_bot_token_1" in status: await fix_database("token")
+    if message != {}:
+        status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
+        if "enter_bot_token_1" in status: await fix_database("token")
 
     if "callback_query" in update:
         class callback:
