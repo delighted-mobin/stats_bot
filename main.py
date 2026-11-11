@@ -105,6 +105,7 @@ async def webhook(request: Request):
                 for i in range(int(len(db_list)/2)):
                     inline_keyboard.append([])
                 if int(len(db_list)/2) == 0: inline_keyboard.append([])
+                inline_keyboard.append([])
 
                 index = 0
                 for data in db_list:
@@ -112,7 +113,7 @@ async def webhook(request: Request):
                     index += 1
                     iindex = int((float(index/2)-0.5)) 
                     last_index = iindex - 1 if iindex != 0 else iindex
-                    await send_message(callback.chat_id, f"{last_index} - {iindex} - {len(inline_keyboard)}")
+                    
                     if len(inline_keyboard[last_index]) >= 2:
                         inline_keyboard[last_index+1].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                     else:
