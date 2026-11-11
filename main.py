@@ -86,6 +86,17 @@ async def setWebhook(token, secret) -> list:
     except Exception as e:
         return str(e)
 
+async def get_status(user_id):
+    try:
+        status = db.get_status(eq="user_id", eq_value=int(user_id))
+        if len(status) != 0:
+            return status[0].get("status","main")
+        else:
+            return "main"
+
+    except Exception as e:
+        return str(e)
+
 async def fix_database(*args):
     if "token" in args: db.connect_db().table("tokens").delete().eq("token","NONE").execute()
 
@@ -116,7 +127,7 @@ async def webhook(request: Request):
     #bot_sec = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "none")
     status = None
     if message != {}:
-        status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0].get("status","main")
+        status = get_status(msg.user.id)
         if "enter_bot_token_1" in status: await fix_database(("token"))
 
     if "callback_query" in update:
@@ -133,7 +144,7 @@ async def webhook(request: Request):
                 last_name = user.get("last_name", "")
                 username = user.get("username","")
 
-        _status = status = db.get_status(eq="user_id", eq_value=int(callback.user.id))[0].get("status","main")
+        _status = get_status(callback.user.id)
         if "enter_bot_token_1" in _status: await fix_database(("token"))
 
         match callback.button:
