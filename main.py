@@ -24,7 +24,7 @@ async def connect_db(app: FastAPI):
 
         yield
     except Exception as e:
-        return e
+        yield e
 
 app = FastAPI(lifespan=connect_db)
 
