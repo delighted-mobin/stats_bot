@@ -22,9 +22,9 @@ async def connect_db(app: FastAPI):
         global supabase
         supabase = await acreate_client(SUPABASE_URL, SUPABASE_KEY)
 
-        yield
+        return
     except Exception as e:
-        yield e
+        return e
 
 app = FastAPI(lifespan=connect_db)
 
