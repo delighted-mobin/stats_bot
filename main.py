@@ -156,7 +156,13 @@ async def webhook(request: Request):
                 inline_keyboard = []
                 db_list = db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
                 
-                if len(db_list) == 0: return
+                if len(db_list) == 0: 
+                    await telegram_request("answerCallbackQuery", {
+                        "callback_query_id": callback.id,
+                        "text": "شما هیچ ربات ثبت شده ای ندارد !.",
+                        "show_alert": False
+                    })
+                    return
 
                 for i in range(int(len(db_list)/2)):
                     inline_keyboard.append([])
