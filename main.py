@@ -60,6 +60,15 @@ async def send_message_data(data):
             "sendMessage",data
         )
 
+async def delete_message(chat_id, message_id):
+    return await telegram_request(
+        "deleteMessage",
+        {
+            "chat_id": chat_id,
+            "message_id": message_id
+        }
+    )
+
 @app.get("/")
 async def index():
     return PlainTextResponse("ok good")
@@ -113,11 +122,13 @@ async def webhook(request: Request):
                     index += 1
                     iindex = int((float(index/2)-0.5)) 
                     last_index = iindex - 1 if iindex != 0 else iindex
-                    
+
                     if len(inline_keyboard[last_index]) >= 2:
                         inline_keyboard[last_index+1].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                     else:
                         inline_keyboard[last_index].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
+                
+                inline_keyboard.append([{"text": "Back", "callback_data": "back_1", "style": "primary"}])
                 await send_message_data(data={
                     "chat_id": callback.chat_id,
                     "text": f"""شما {len(token_list)} ربات ثبت شده دارید\nبرای مدیریت هر توکن برروی آن کلیک کنید""",
@@ -125,6 +136,23 @@ async def webhook(request: Request):
                         "inline_keyboard": inline_keyboard
                     }
                 })
+            case "back_1":
+                db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
+                await delete_message(callback.chat_id, callback.message_id)
+                await send_message_data(data={
+                            "chat_id": msg.chat_id,
+                            "text": """
+                            Create Bot
+                            """,
+                            "reply_markup": {
+                                "inline_keyboard": [
+                                        [
+                                            {"text": "Create bot", "callback_data": "cb_1", "style": "primary"},
+                                            {"text": "My bots", "callback_data": "mb_1", "style": "success"}
+                                        ]
+                                    ]
+                                }
+                            })
                 
         return {"ok": True}
 
@@ -152,8 +180,8 @@ async def webhook(request: Request):
             await send_message_data(data={
             "chat_id": msg.chat_id,
             "text": """
-Create Bot
-    """,
+            Create Bot
+            """,
             "reply_markup": {
                 "inline_keyboard": [
                         [
