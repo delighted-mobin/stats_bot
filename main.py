@@ -246,7 +246,7 @@ async def webhook(request: Request):
                     resp = await setWebhook(msg.text, secret)
                     await send_reply(msg.chat_id, msg.message_id, str(resp))
 
-                    if resp.get("result",False) != True:
+                    if resp.get("ok",False) != True:
                         await send_reply(msg.chat_id, "عملیات ست کردن توکن موفقیت آمیز نبود.\nلطفا دوباره تلاش کنید")
                         return {"ok": True}
                     
