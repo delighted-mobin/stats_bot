@@ -193,7 +193,7 @@ async def webhook(request: Request):
                 })
             case text if "mb_2" in text:
                 data = db.select("tokens", eq="secret", eq_value=f"{text[3:]}")
-                await send_message(callback.chat_id, str(data))
+                await send_message(callback.chat_id, f"{str(data)} {text}")
             case "back_1":
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
                 await edit_message(data={
