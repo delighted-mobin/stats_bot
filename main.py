@@ -193,7 +193,27 @@ async def webhook(request: Request):
                 })
             case text if "mb_2" in text:
                 data = db.select("tokens", eq="secret", eq_value=f"{text[5:]}")
-                await send_message(callback.chat_id, f"{str(data)} {text}")
+                inline_keyboard = [
+                    [
+                        {"text": "Delete bot", "callback_data": f"db_1_{data[0]["secret"]}", "style": "danger"}
+                    ],
+                    [
+                        {"text": "Back", "callback_data": "back_1", "style": "primary"}
+                    ]
+                ]
+                
+                await edit_message(data={
+                    "chat_id": callback.chat_id,
+                    "message_id": callback.message_id,
+                    "text": f"""
+                    نام ربات: {data[0]["name"]}
+                    توکن ربات: {data[0]["token"]}
+
+                    """,
+                    "reply_markup": {
+                        "inline_keyboard": inline_keyboard
+                    }
+                })                
             case "back_1":
                 db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
                 await edit_message(data={
