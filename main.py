@@ -10,7 +10,7 @@ from supabase import create_client, Client
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 
-app = FastAPI()
+app = FastAPI(lifespan=db.connect_db)
 
 TOKEN = os.environ.get("BOT_TOKEN", "")
 
@@ -111,11 +111,11 @@ async def webhook(request: Request):
                     "chat_id": callback.chat_id,
                     "text": "نام بات رو وارد کنید:"
                 })
-                db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_name_1")
+                await db.set_status(eq="user_id", eq_value=int(callback.user.id), status="enter_bot_name_1")
             case "mb_1":
                 token_list = []
                 inline_keyboard = []
-                db_list = db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
+                db_list = await db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
                 if len(db_list) == 0: return
 
                 for i in range(int(len(db_list)/2)):
@@ -145,7 +145,7 @@ async def webhook(request: Request):
                     }
                 })
             case "back_1":
-                db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
+                await db.set_status(eq="user_id", eq_value=int(callback.user.id), status="main")
                 await edit_message(data={
                     "chat_id": callback.chat_id,
                     "message_id": callback.message_id,
@@ -178,15 +178,15 @@ async def webhook(request: Request):
         chat_type = message.get("chat",{}).get("type","")
         text = str(message.get("text", ""))
 
-    if db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
-        db.insert(data={
+    if await db.exist(eq="user_id", eq_value=int(msg.user.id)) == False:
+        await db.insert(data={
             "name": f'{msg.user.first_name} {msg.user.last_name}',
             "username": str(msg.user.username),
             "user_id": int(msg.user.id)
         })
 
     if msg.text == "/start":
-        db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+        await db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
         await send_message_data(data={
             "chat_id": msg.chat_id,
             "text": """
@@ -204,31 +204,31 @@ async def webhook(request: Request):
 
     await send_message(msg.chat_id, str(db.get_status(eq="user_id", eq_value=int(msg.user.id))))
 
-    status = db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
+    status = await db.get_status(eq="user_id", eq_value=int(msg.user.id))[0]["status"]
     match status:
         case "main":
             pass
         case "enter_bot_name_1":
-            if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("name",msg.text.lower()).execute().data != []:
+            if await db.supabase.table("tokens").select("*").eq("creator_id",msg.user.id).eq("name",msg.text.lower()).execute().data != []:
                 await send_reply(msg.chat_id, msg.message_id, "نام ربات تکراری هست\nنام دیگری وارد کنید:")
                 return
             
             if len(msg.text) > 1 and len(msg.text) <= 32:
                 auth = random.randint(1111111111111111, 9999999999999999)
 
-                db.insert(table_name="tokens", data={"name":msg.text.lower(), "creator_id":msg.user.id, "secret":str(auth)})
-                db.set_status(eq="user_id", eq_value=int(msg.user.id), status=f"enter_bot_token_1_{auth}")
+                await db.insert(table_name="tokens", data={"name":msg.text.lower(), "creator_id":msg.user.id, "secret":str(auth)})
+                await db.set_status(eq="user_id", eq_value=int(msg.user.id), status=f"enter_bot_token_1_{auth}")
                 await send_reply(msg.chat_id, msg.message_id, "توکن ربات رو وارد کنید:")
         case text if "enter_bot_token_1" in text:
             if len(msg.text) > 10 and len(msg.text) < 120:
                 secret = msg.text[0:10]
                 auth = text[18:34]
 
-                if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
+                if await db.supabase.table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
                     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
                 else:
-                    db.connect_db().table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("secret",auth).execute().data
-                    db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
+                    await db.supabase.table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("secret",auth).execute().data
+                    await db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
     return {"ok": True}

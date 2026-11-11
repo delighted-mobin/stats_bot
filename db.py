@@ -1,79 +1,76 @@
 import supabase
 import os
-from supabase import create_client, Client
+import main
+from supabase import acreate_client, AsyncClient
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase: AsyncClient = None
 
-
-def connect_db(url = SUPABASE_URL, key = SUPABASE_KEY) -> Client:
+@asynccontextmanager
+async def connect_db(app: main.FastAPI):
     try:
-        db = create_client(url, key)
-        return db
+        global supabase
+        supabase = await acreate_client(SUPABASE_URL, SUPABASE_KEY)
+
+        yield
     except Exception as e:
         return e
 
-
-def fetch(table_name:str = "users"):
+async def fetch(table_name:str = "users"):
     try:
-        db = connect_db()
-        response = db.table(table_name).select("*").execute()
+        response = await supabase.table(table_name).select("*").execute()
         return response.data
     except Exception as e:
         return e
 
-def select(table_name:str = "users", eq:str = "id", eq_value:str = "0"):
+async def select(table_name:str = "users", eq:str = "id", eq_value:str = "0"):
     try:
-        db = connect_db()
-        response = db.table(table_name).select("*").eq(eq, eq_value).execute()
+        response = await supabase.table(table_name).select("*").eq(eq, eq_value).execute()
         return response.data
     except:
         return -1
 
-def insert(table_name:str = "users", data:dict = {}):
+async def insert(table_name:str = "users", data:dict = {}):
     try:
-        db = connect_db()
-        response = db.table(table_name).insert(data).execute()
+        response = await supabase.table(table_name).insert(data).execute()
         return response.data
     except:
         return -1
 
-def update(table_name:str = "users", eq:str = "id", eq_value:str = "0", data:dict = {}):
+async def update(table_name:str = "users", eq:str = "id", eq_value:str = "0", data:dict = {}):
     try:
-        db = connect_db()
-        response = db.table(table_name).update(data).eq(eq, eq_value).execute()
+        response = await supabase.table(table_name).update(data).eq(eq, eq_value).execute()
         return response.data
     except:
         return -1
 
-def upsert(table_name:str = "users", data:dict = {}):
+async def upsert(table_name:str = "users", data:dict = {}):
     try:
-        db = connect_db()
-        response = db.table(table_name).upsert(data).execute()
+        response = await supabase.table(table_name).upsert(data).execute()
         return response.data
     except:
         return -1
 
-def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
+async def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
     try:
-        db = connect_db()
-        response = db.table(table_name).select("*").eq(eq, eq_value).execute()
+        response = await supabase.table(table_name).select("*").eq(eq, eq_value).execute()
         return True if response.data != [] else False
     except:
         return -1
 
 
-def set_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
+async def set_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
     try:
-        db = connect_db()
-        response = db.table(table_name).update({"status": status}).eq(eq, eq_value).execute()
+        response = await supabase.table(table_name).update({"status": status}).eq(eq, eq_value).execute()
         return response.data
     except:
         return -1
 
-def get_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
+async def get_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
     try:
-        db = connect_db()
-        response = db.table(table_name).select("status").eq(eq, eq_value).execute()
+        response = await supabase.table(table_name).select("status").eq(eq, eq_value).execute()
         return response.data
     except:
         return -1
