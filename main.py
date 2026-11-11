@@ -222,7 +222,7 @@ async def webhook(request: Request):
         case text if "enter_bot_token_1" in text:
             if len(msg.text) > 10:
                 secret = msg.text[0:10]
-                auth = text[18,34]
+                auth = text[18:34]
                 await send_message(msg.chat_id, str(auth))
 
                 # if db.connect_db().table("tokens").select("*").eq("creator_id",msg.user.id).eq("token",msg.text).execute().data != []:
