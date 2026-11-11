@@ -77,6 +77,15 @@ async def edit_message(data):
     except Exception as e:
         return str(e)
 
+async def setWebhook(token, secret):
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            response = await client.post(f"https://api.telegram.org/bot{token}/setWebhook?url=stats-bot-omega.vercel.app/&secret_token={secret}")
+            response.raise_for_status()
+            return response.json()
+    except Exception as e:
+        return str(e)
+
 @app.get("/")
 async def index():
     return PlainTextResponse("ok good")
@@ -228,6 +237,8 @@ async def webhook(request: Request):
                     await send_reply(msg.chat_id, msg.message_id, "این توکن قبلا ثبت شده است\nتوکن دیگری وارد کنید:")
                 else:
                     db.connect_db().table("tokens").update({"token":msg.text, "secret":secret}).eq("creator_id",msg.user.id).eq("secret",auth).execute().data
+                    resp = await setWebhook(msg.text, secret)
+                    await send_message(msg.chat_id, str(resp))
                     db.set_status(eq="user_id", eq_value=int(msg.user.id), status="main")
                     await send_reply(msg.chat_id, msg.message_id, "توکن با موفقیت اضافه شد")
 
