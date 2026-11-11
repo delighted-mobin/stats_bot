@@ -87,6 +87,9 @@ async def setWebhook(token, secret):
     except Exception as e:
         return str(e)
 
+async def fix_database(*args):
+    if "fix_token" in args: db.connect_db().table("tokens").delete().eq("token",None).execute()
+
 @app.get("/")
 async def index():
     return PlainTextResponse("ok good")
@@ -126,6 +129,7 @@ async def webhook(request: Request):
                 token_list = []
                 inline_keyboard = []
                 db_list = db.select(table_name="tokens", eq="creator_id", eq_value=int(callback.user.id))
+                
                 if len(db_list) == 0: return
 
                 for i in range(int(len(db_list)/2)):
@@ -135,11 +139,12 @@ async def webhook(request: Request):
 
                 index = 0
                 for data in db_list:
+                    if len(data["token"]) < 2: break
                     token_list.append(data["token"])
                     index += 1
                     iindex = int((float(index/2)-0.5)) 
                     last_index = iindex - 1 if iindex != 0 else iindex
-
+                
                     if len(inline_keyboard[last_index]) >= 2:
                         inline_keyboard[last_index+1].append({"text": data["secret"], "callback_data": "mb_2", "style": "success"})
                     else:

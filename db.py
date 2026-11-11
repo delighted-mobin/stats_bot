@@ -60,7 +60,6 @@ def exist(table_name:str = "users", eq:str = "id", eq_value:int = 0):
     except:
         return -1
 
-
 def set_status(table_name:str = "users", eq:str = "id", eq_value:int = 0, status:str = "main"):
     try:
         db = connect_db()
